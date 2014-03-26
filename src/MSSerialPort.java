@@ -1,17 +1,30 @@
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.UnsupportedCommOperationException;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.BoxLayout;
+
 import java.awt.FlowLayout;
+
 import javax.swing.JSplitPane;
 import javax.swing.JPanel;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+
 import javax.swing.border.TitledBorder;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
@@ -20,13 +33,33 @@ import javax.swing.AbstractListModel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.Box;
+
 import java.awt.Component;
+
 import javax.swing.border.LineBorder;
+
 import java.awt.Color;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.JToggleButton;
+
+//import TwoWaySerialComm.SerialReader;
+//import TwoWaySerialComm.SerialWriter;
+
+
+
+
+
+
+
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 
 public class MSSerialPort {
@@ -75,12 +108,21 @@ public class MSSerialPort {
 	private JComboBox comboBox;
 	private JComboBox comboBox_1;
 
+	private CommPortIdentifier portId;
+	private CommPort commPort;
+	private SerialPort serialPort;
+	private InputStream in;
+	private OutputStream out;
+	private boolean isPortOpen = false;
+	private Thread rxThread; 
+	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel("ch.randelshofer.quaqua.tiger.Quaqua15TigerCrossPlatformLookAndFeel");
+			JDialog.setDefaultLookAndFeelDecorated(true);
 			JFrame.setDefaultLookAndFeelDecorated(true);
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -170,6 +212,60 @@ public class MSSerialPort {
 						}
 						{
 							btnOpenPort = new JButton("\u6253\u5F00");
+							btnOpenPort.addActionListener(new ActionListener() {
+								public void actionPerformed(ActionEvent arg0) {
+									if(isPortOpen == false) {
+										String portName = "COM" + txtPortNumber.getText();
+										try {
+											portId = CommPortIdentifier.getPortIdentifier(portName);							
+											int timeout = 2000;
+											commPort = portId.open(this.getClass().getName(),
+													timeout);
+											if (commPort instanceof SerialPort) {
+												serialPort = (SerialPort) commPort;
+												serialPort.setSerialPortParams(57600, SerialPort.DATABITS_8,
+														SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+												
+												in = serialPort.getInputStream();
+												out = serialPort.getOutputStream();	
+												
+												rxThread = (new Thread(new SerialReader(in)));
+												rxThread.start();
+												btnOpenPort.setText("关闭");
+												isPortOpen = true;
+
+											} else {
+												JOptionPane.showMessageDialog(null, "仅支持串口。", "错误", JOptionPane.ERROR_MESSAGE);
+											}
+										} catch (NoSuchPortException e) {
+											JOptionPane.showMessageDialog(null, "端口不存在。", "错误", JOptionPane.ERROR_MESSAGE);
+											//e.printStackTrace();
+										} catch (PortInUseException e) {
+											JOptionPane.showMessageDialog(null, "端口被占用。", "错误", JOptionPane.ERROR_MESSAGE);
+											//printStackTrace();
+										} catch (UnsupportedCommOperationException e) {
+											JOptionPane.showMessageDialog(null, "不支持的操作。", "错误", JOptionPane.ERROR_MESSAGE);
+											//printStackTrace();
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									} else {
+										serialPort.notifyOnDataAvailable(false);  
+						                //serialPort.removeEventListener();  
+										isPortOpen = false;
+										try {
+											in.close();
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}  					      
+										serialPort.close();
+										btnOpenPort.setText("打开");
+										//isPortOpen = false;
+									}
+								}
+							});
 							GridBagConstraints gbc_btnOpenPort = new GridBagConstraints();
 							gbc_btnOpenPort.fill = GridBagConstraints.HORIZONTAL;
 							gbc_btnOpenPort.insets = new Insets(0, 0, 5, 0);
@@ -188,6 +284,7 @@ public class MSSerialPort {
 						}
 						{
 							txtBaudRate = new JTextField();
+							txtBaudRate.setText("9600");
 							GridBagConstraints gbc_txtBaudRate = new GridBagConstraints();
 							gbc_txtBaudRate.insets = new Insets(0, 0, 5, 5);
 							gbc_txtBaudRate.fill = GridBagConstraints.HORIZONTAL;
@@ -271,6 +368,7 @@ public class MSSerialPort {
 						}
 						{
 							txtDataBits = new JTextField();
+							txtDataBits.setText("8");
 							GridBagConstraints gbc_txtDataBits = new GridBagConstraints();
 							gbc_txtDataBits.insets = new Insets(0, 0, 5, 5);
 							gbc_txtDataBits.fill = GridBagConstraints.HORIZONTAL;
@@ -430,6 +528,16 @@ public class MSSerialPort {
 					panelSend.add(hBoxSendBtn);
 					{
 						btnSend = new JButton("\u53D1\u9001");
+						btnSend.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent arg0) {
+								try {
+									out.write(textAreaSend.getText().getBytes());
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						});
 						hBoxSendBtn.add(btnSend);
 					}
 					{
@@ -450,6 +558,27 @@ public class MSSerialPort {
 		{
 			vStrutBottom = Box.createVerticalStrut(20);
 			frmMsserialport.getContentPane().add(vStrutBottom);
+		}
+	}
+	
+	class SerialReader implements Runnable {
+		InputStream in;
+		
+		public SerialReader(InputStream in) {
+			this.in = in;
+		}
+
+		public void run() {
+			byte[] buffer = new byte[1024];
+			int len = -1;
+			try {
+				while ((len = this.in.read(buffer)) != -1 && isPortOpen) {
+					System.out.print(new String(buffer, 0, len));
+					textAreaRxText.append(new String(buffer, 0, len));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
