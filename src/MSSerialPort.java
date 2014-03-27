@@ -81,18 +81,18 @@ public class MSSerialPort {
 	private JLabel lblNewLabel_3;
 	private JButton btnSetSepura;
 	private JScrollPane scrollPaneCmd;
-	private JList listCmd;
+	private JList lstCmd;
 	private JButton btnAddCmd;
 	private JButton btnRemoveCmd;
 	private JButton btnClearCmd;
 	private JButton btnImportCmd;
 	private JButton btnExportCmd;
-	private JCheckBox chckbxAutosaveCmd;
+	private JCheckBox chkAutosave;
 	private JTabbedPane tabbedPaneRxData;
 	private JScrollPane scrollPaneRxText;
 	private JScrollPane scrollPaneRxHex;
-	private JTextArea textAreaRxText;
-	private JTextArea textAreaRxHex;
+	private JTextArea txtaRxText;
+	private JTextArea txtaRxHex;
 	private JPanel panelSend;
 	private Box hBoxSendBtn;
 	private JButton btnSend;
@@ -100,13 +100,13 @@ public class MSSerialPort {
 	private JButton btnExit;
 	private Component hGlueSend;
 	private JScrollPane scrollPaneSend;
-	private JTextArea textAreaSend;
+	private JTextArea txtaTxText;
 	private Component vStrutBottom;
 	private JLabel lblNewLabel_4;
 	private JTextField txtDataBits;
-	private JButton btnNewButton;
-	private JComboBox comboBox;
-	private JComboBox comboBox_1;
+	private JButton btnViewPorts;
+	private JComboBox cboCheckBit;
+	private JComboBox cboStopBits;
 
 	private CommPortIdentifier portId;
 	private CommPort commPort;
@@ -114,7 +114,7 @@ public class MSSerialPort {
 	private InputStream in;
 	private OutputStream out;
 	private boolean isPortOpen = false;
-	private Thread rxThread; 
+	private Thread rxThread;
 	
 	/**
 	 * Launch the application.
@@ -312,14 +312,14 @@ public class MSSerialPort {
 							panelConfig.add(lblNewLabel_2, gbc_lblNewLabel_2);
 						}
 						{
-							comboBox = new JComboBox();
-							comboBox.setModel(new DefaultComboBoxModel(new String[] {"\u65E0", "\u5947\u6821\u9A8C", "\u5076\u6821\u9A8C"}));
-							GridBagConstraints gbc_comboBox = new GridBagConstraints();
-							gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-							gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-							gbc_comboBox.gridx = 1;
-							gbc_comboBox.gridy = 3;
-							panelConfig.add(comboBox, gbc_comboBox);
+							cboCheckBit = new JComboBox();
+							cboCheckBit.setModel(new DefaultComboBoxModel(new String[] {"\u65E0", "\u5947\u6821\u9A8C", "\u5076\u6821\u9A8C"}));
+							GridBagConstraints gbc_cboCheckBit = new GridBagConstraints();
+							gbc_cboCheckBit.insets = new Insets(0, 0, 5, 5);
+							gbc_cboCheckBit.fill = GridBagConstraints.HORIZONTAL;
+							gbc_cboCheckBit.gridx = 1;
+							gbc_cboCheckBit.gridy = 3;
+							panelConfig.add(cboCheckBit, gbc_cboCheckBit);
 						}
 						{
 							btnSetMoto = new JButton("Moto");
@@ -340,14 +340,14 @@ public class MSSerialPort {
 							panelConfig.add(lblNewLabel_3, gbc_lblNewLabel_3);
 						}
 						{
-							comboBox_1 = new JComboBox();
-							comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"1", "1.5", "2", "\u65E0"}));
-							GridBagConstraints gbc_comboBox_1 = new GridBagConstraints();
-							gbc_comboBox_1.insets = new Insets(0, 0, 0, 5);
-							gbc_comboBox_1.fill = GridBagConstraints.HORIZONTAL;
-							gbc_comboBox_1.gridx = 1;
-							gbc_comboBox_1.gridy = 4;
-							panelConfig.add(comboBox_1, gbc_comboBox_1);
+							cboStopBits = new JComboBox();
+							cboStopBits.setModel(new DefaultComboBoxModel(new String[] {"1", "1.5", "2", "\u65E0"}));
+							GridBagConstraints gbc_cboStopBits = new GridBagConstraints();
+							gbc_cboStopBits.insets = new Insets(0, 0, 0, 5);
+							gbc_cboStopBits.fill = GridBagConstraints.HORIZONTAL;
+							gbc_cboStopBits.gridx = 1;
+							gbc_cboStopBits.gridy = 4;
+							panelConfig.add(cboStopBits, gbc_cboStopBits);
 						}
 						{
 							btnSetSepura = new JButton("Sepura");
@@ -378,13 +378,13 @@ public class MSSerialPort {
 							txtDataBits.setColumns(10);
 						}
 						{
-							btnNewButton = new JButton("\u67E5\u770B...");
-							GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-							gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-							gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-							gbc_btnNewButton.gridx = 2;
-							gbc_btnNewButton.gridy = 2;
-							panelConfig.add(btnNewButton, gbc_btnNewButton);
+							btnViewPorts = new JButton("\u67E5\u770B...");
+							GridBagConstraints gbc_btnViewPorts = new GridBagConstraints();
+							gbc_btnViewPorts.fill = GridBagConstraints.HORIZONTAL;
+							gbc_btnViewPorts.insets = new Insets(0, 0, 5, 0);
+							gbc_btnViewPorts.gridx = 2;
+							gbc_btnViewPorts.gridy = 2;
+							panelConfig.add(btnViewPorts, gbc_btnViewPorts);
 						}
 					}
 					{
@@ -412,9 +412,9 @@ public class MSSerialPort {
 							gbc_scrollPaneCmd.gridy = 0;
 							panelCmd.add(scrollPaneCmd, gbc_scrollPaneCmd);
 							{
-								listCmd = new JList();
-								listCmd.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-								listCmd.setModel(new AbstractListModel() {
+								lstCmd = new JList();
+								lstCmd.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+								lstCmd.setModel(new AbstractListModel() {
 									String[] values = new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"};
 									public int getSize() {
 										return values.length;
@@ -423,7 +423,7 @@ public class MSSerialPort {
 										return values[index];
 									}
 								});
-								scrollPaneCmd.setViewportView(listCmd);
+								scrollPaneCmd.setViewportView(lstCmd);
 							}
 						}
 						{
@@ -472,14 +472,14 @@ public class MSSerialPort {
 							panelCmd.add(btnExportCmd, gbc_btnExportCmd);
 						}
 						{
-							chckbxAutosaveCmd = new JCheckBox("\u81EA\u52A8\u4FDD\u5B58");
-							chckbxAutosaveCmd.setToolTipText("Auto Save");
-							chckbxAutosaveCmd.setSelected(true);
-							GridBagConstraints gbc_chckbxAutosaveCmd = new GridBagConstraints();
-							gbc_chckbxAutosaveCmd.fill = GridBagConstraints.HORIZONTAL;
-							gbc_chckbxAutosaveCmd.gridx = 2;
-							gbc_chckbxAutosaveCmd.gridy = 2;
-							panelCmd.add(chckbxAutosaveCmd, gbc_chckbxAutosaveCmd);
+							chkAutosave = new JCheckBox("\u81EA\u52A8\u4FDD\u5B58");
+							chkAutosave.setToolTipText("Auto Save");
+							chkAutosave.setSelected(true);
+							GridBagConstraints gbc_chkAutosave = new GridBagConstraints();
+							gbc_chkAutosave.fill = GridBagConstraints.HORIZONTAL;
+							gbc_chkAutosave.gridx = 2;
+							gbc_chkAutosave.gridy = 2;
+							panelCmd.add(chkAutosave, gbc_chkAutosave);
 						}
 					}
 				}
@@ -490,18 +490,18 @@ public class MSSerialPort {
 						scrollPaneRxText = new JScrollPane();
 						tabbedPaneRxData.addTab("\u6587\u672C", null, scrollPaneRxText, null);
 						{
-							textAreaRxText = new JTextArea();
-							textAreaRxText.setLineWrap(true);
-							scrollPaneRxText.setViewportView(textAreaRxText);
+							txtaRxText = new JTextArea();
+							txtaRxText.setLineWrap(true);
+							scrollPaneRxText.setViewportView(txtaRxText);
 						}
 					}
 					{
 						scrollPaneRxHex = new JScrollPane();
 						tabbedPaneRxData.addTab("\u5341\u516D\u8FDB\u5236", null, scrollPaneRxHex, null);
 						{
-							textAreaRxHex = new JTextArea();
-							textAreaRxHex.setLineWrap(true);
-							scrollPaneRxHex.setViewportView(textAreaRxHex);
+							txtaRxHex = new JTextArea();
+							txtaRxHex.setLineWrap(true);
+							scrollPaneRxHex.setViewportView(txtaRxHex);
 						}
 					}
 				}
@@ -517,9 +517,9 @@ public class MSSerialPort {
 					scrollPaneSend.setAlignmentX(Component.LEFT_ALIGNMENT);
 					panelSend.add(scrollPaneSend);
 					{
-						textAreaSend = new JTextArea();
-						textAreaSend.setLineWrap(true);
-						scrollPaneSend.setViewportView(textAreaSend);
+						txtaTxText = new JTextArea();
+						txtaTxText.setLineWrap(true);
+						scrollPaneSend.setViewportView(txtaTxText);
 					}
 				}
 				{
@@ -531,7 +531,7 @@ public class MSSerialPort {
 						btnSend.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent arg0) {
 								try {
-									out.write(textAreaSend.getText().getBytes());
+									out.write(txtaTxText.getText().getBytes());
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -574,7 +574,8 @@ public class MSSerialPort {
 			try {
 				while ((len = this.in.read(buffer)) != -1 && isPortOpen) {
 					System.out.print(new String(buffer, 0, len));
-					textAreaRxText.append(new String(buffer, 0, len));
+					txtaRxText.append(new String(buffer, 0, len));
+					txtaRxText.setCaretPosition(txtaRxText.getText().length());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
