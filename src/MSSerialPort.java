@@ -231,23 +231,18 @@ public class MSSerialPort {
 												
 												rxThread = (new Thread(new SerialReader(in)));
 												rxThread.start();
-												btnOpenPort.setText("关闭");
 												isPortOpen = true;
-
+												switchInterface(isPortOpen);
 											} else {
 												JOptionPane.showMessageDialog(null, "仅支持串口。", "错误", JOptionPane.ERROR_MESSAGE);
 											}
 										} catch (NoSuchPortException e) {
 											JOptionPane.showMessageDialog(null, "端口不存在。", "错误", JOptionPane.ERROR_MESSAGE);
-											//e.printStackTrace();
 										} catch (PortInUseException e) {
 											JOptionPane.showMessageDialog(null, "端口被占用。", "错误", JOptionPane.ERROR_MESSAGE);
-											//printStackTrace();
 										} catch (UnsupportedCommOperationException e) {
 											JOptionPane.showMessageDialog(null, "不支持的操作。", "错误", JOptionPane.ERROR_MESSAGE);
-											//printStackTrace();
 										} catch (IOException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 									} else {
@@ -257,12 +252,10 @@ public class MSSerialPort {
 										try {
 											in.close();
 										} catch (IOException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}  					      
 										serialPort.close();
-										btnOpenPort.setText("打开");
-										//isPortOpen = false;
+										switchInterface(isPortOpen);
 									}
 								}
 							});
@@ -559,6 +552,22 @@ public class MSSerialPort {
 			vStrutBottom = Box.createVerticalStrut(20);
 			frmMsserialport.getContentPane().add(vStrutBottom);
 		}
+	}
+	
+	private void switchInterface(boolean isPortOpen) {
+		if(isPortOpen) {
+			btnOpenPort.setText("关闭");
+		} else {
+			btnOpenPort.setText("打开");
+		}
+		
+		txtPortNumber.setEnabled(!isPortOpen);
+		txtBaudRate.setEnabled(!isPortOpen);
+		txtDataBits.setEnabled(!isPortOpen);
+		cboCheckBit.setEnabled(!isPortOpen);
+		cboStopBits.setEnabled(!isPortOpen);
+		
+		btnSend.setEnabled(isPortOpen);
 	}
 	
 	class SerialReader implements Runnable {
