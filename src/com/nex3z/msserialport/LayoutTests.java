@@ -1,3 +1,5 @@
+package com.nex3z.msserialport;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;

@@ -1,8 +1,10 @@
+package com.nex3z.msserialport;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import gnu.io.*;
-
+ 
 public class TwoWaySerialComm {
 
 	void connect(String portName) throws Exception {

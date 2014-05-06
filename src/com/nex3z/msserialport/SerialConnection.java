@@ -1,12 +1,16 @@
+package com.nex3z.msserialport;
+
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import gnu.io.*;
 
-public class SerialComm {
+public class SerialConnection {
 	private int baudRate = 9600;
 	private int dataBits = SerialPort.DATABITS_8;
-	//private int flowControl;
 	private int parity = SerialPort.PARITY_NONE;
 	private int stopBits = SerialPort.STOPBITS_1;
 	
@@ -20,37 +24,33 @@ public class SerialComm {
 	public OutputStream getSerialPortOut() {
 		return serialPortOut;
 	}
-	
+
 	public void setConnectParam(int baudRate, int dataBits, int parity, int stopBits) {
 		this.baudRate = baudRate;
 		this.dataBits = dataBits;
 		this.parity = parity;
 		this.stopBits = stopBits;
 	}
-	
+
 	public void connect(String portName) throws Exception {
-		CommPortIdentifier portIdentifier = CommPortIdentifier
-				.getPortIdentifier(portName);
-		if (portIdentifier.isCurrentlyOwned()) {
-			System.out.println("Error: " + portName + " is currently in use.");
+		CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+
+		int timeout = 2000;
+		CommPort commPort = portIdentifier.open(this.getClass().getName(), timeout);
+
+		if (commPort instanceof SerialPort) {
+			SerialPort serialPort = (SerialPort) commPort;
+			serialPort.setSerialPortParams(this.baudRate, this.dataBits,
+					this.stopBits, this.parity);
+
+			serialPortIn = serialPort.getInputStream();
+			serialPortOut = serialPort.getOutputStream();
+
+			//(new Thread(new SerialReader(serialPortIn))).start();
+			//(new Thread(new SerialWriter(serialPortOut))).start();
+
 		} else {
-			int timeout = 2000;
-			CommPort commPort = portIdentifier.open(this.getClass().getName(), timeout);
-
-			if (commPort instanceof SerialPort) {
-				SerialPort serialPort = (SerialPort) commPort;
-				serialPort.setSerialPortParams(this.baudRate, this.dataBits,
-						this.stopBits, this.parity);
-
-				serialPortIn = serialPort.getInputStream();
-				serialPortOut = serialPort.getOutputStream();
-
-				(new Thread(new SerialReader(serialPortIn))).start();
-				(new Thread(new SerialWriter(serialPortOut))).start();
-
-			} else {
-				System.out.println("Error: Only serial ports are handled.");
-			}
+			System.out.println("Error: Only serial ports are handled.");
 		}
 	}
 

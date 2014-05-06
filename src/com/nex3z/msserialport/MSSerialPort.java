@@ -1,3 +1,5 @@
+package com.nex3z.msserialport;
+
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;

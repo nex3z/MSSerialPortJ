@@ -1,3 +1,5 @@
+package com.nex3z.msserialport;
+
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
